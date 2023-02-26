@@ -1,0 +1,27 @@
+;; shadow-cljs configuration
+{:source-paths ["src/dev"
+                "src/main"
+                "src/test"]
+
+ :dependencies [[binaryage/devtools "0.9.7"]
+                [cider/cider-nrepl "0.28.1"]]
+
+ :builds
+ {:app {;; the javascript bundle is targeted to browser env
+        :target     :browser
+        ;; the module `:main` is written here as `main.js`
+        :output-dir "public/js/compiled"
+        :asset-path "/js/compiled"
+        ;; modules created from Clojurescript sources
+        :modules {:main {:entries [app.core]}}
+        ;; set up development related configuration
+        :devtools
+        ;; before live-reloading any code call this function
+        {:before-load app.core/stop
+         ;; after live-reloading finishes call this function
+         :after-load  app.core/start
+         ;; serve the public directory over http at port 3000
+         :http-port   3000
+         :http-root   "public"
+         ;; initialize devtools
+         :preloads    [devtools.preload]}}}}
