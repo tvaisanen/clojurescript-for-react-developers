@@ -2,6 +2,7 @@
 (ns app.core
   (:require [helix.core :refer [defnc $]]
             [helix.dom :as d]
+            [app.starwars :as sw]
             ["react" :as react]
             ["react-dom/client" :as rdom]))
 
@@ -32,4 +33,4 @@
   (.render (react-root)
            ;; `$` is a macro to make a React
            ;; element out of the given component
-           ($ react/StrictMode ($ App))))
+           ($ react/StrictMode ($ sw/StarwarsApp))))

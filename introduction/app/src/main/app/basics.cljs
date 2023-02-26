@@ -1,10 +1,10 @@
 (ns app.basics)
-;; clojure lingo [js , clj] 
+;; clojure lingo [js , clj]
 ;; array = vector
 ;; object = map
 ;; explain list ...js doesnt have it,
 ;; what can we do with it and to it
-;; explain namespace 
+;; explain namespace
 ;; keyword (:)
 
 (comment
@@ -14,9 +14,8 @@
   ;; define variables
 
   (def number-variable 1)
-
-  (= 2 (+ 1 1 ))
-  
+  ;; number-variable
+  ;; => 1
 
   (def string-variable "variable")
   ;; string-variable
