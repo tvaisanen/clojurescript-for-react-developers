@@ -4,7 +4,11 @@
                 "src/test"]
 
  :dependencies [[binaryage/devtools "0.9.7"]
-                [cider/cider-nrepl "0.28.1"]]
+                [cider/cider-nrepl "0.28.1"]
+                ;; React wrapper
+                [lilactown/helix "0.1.5"]
+                ;; Storybook like development
+                [devcards "0.2.5"]]
 
  :builds
  {:app {;; the javascript bundle is targeted to browser env
@@ -13,14 +17,14 @@
         :output-dir "public/js/compiled"
         :asset-path "/js/compiled"
         ;; modules created from Clojurescript sources
-        :modules {:main {:entries [app.core]}}
+        :modules    {:main {:entries [app.core]}}
         ;; set up development related configuration
         :devtools
         ;; before live-reloading any code call this function
-        {:before-load app.core/stop
-         ;; after live-reloading finishes call this function
-         :after-load  app.core/start
-         ;; serve the public directory over http at port 3000
+        {;; remove before-load and remove-load for now since
+         ;; we don't need them right now
+         ;; :before-load app.core/stop
+         ;; :after-load  app.core/init
          :http-port   3000
          :http-root   "public"
          ;; initialize devtools
