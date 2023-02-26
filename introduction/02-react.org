@@ -1,0 +1,263 @@
+* Setup React
+
+Add helix (react wrapper) to  your dependencies
+
+#+begin_src clojure
+  {...
+   :dependencies [[binaryage/devtools "0.9.7"]
+                  [cider/cider-nrepl "0.28.1"]
+                  ;; React wrapper
+                  [lilactown/helix "0.1.5"] ...}
+#+end_src
+
+#+begin_src bash
+❯ npm install react react-dom
+#+end_src
+
+and restart the development server to load the new dependencies
+
+** Setup React Rendering
+
+#+begin_src clojure
+    (ns app.core
+    (:require [helix.core :refer [defnc $]]
+              [helix.dom :as d]
+              ["react" :as react]
+              ["react-dom/client" :as rdom]))
+
+  ;; `defnc` macro creates a react component
+  ;;
+  ;; const App = () => {
+  ;;   return <div>This is a React component.</div
+  ;; }
+  ;;
+  (defnc App []
+    (d/div "This is a React component."))
+
+  ;; const appContainer = () =>  document.getElementbyId("app")
+  (defn app-container []
+    (js/document.getElementById "app"))
+
+  (defonce root (atom nil))
+
+  (defn react-root []
+    (when-not @root
+      ;; createRoot should be done only once so
+      ;; let's store the reference to `root`
+      ;; if not already exist
+      (reset! root (rdom/createRoot (app-container))))
+    @root)
+
+  ;; add ^:dev/after-load to re-mount the app on file change
+  ;; OR update the shadow-cljs.edn config file to run
+  ;; app.core.init on after-load
+  (defn ^:dev/after-load init
+    "This function is used in the `index.html`
+    to load the application."
+    []
+    (.render (react-root)
+             ;; `$` is a macro to make a React
+             ;; element out of the given component
+             ($ react/StrictMode ($ App))))
+#+end_src
+
+** Lets build a Star Wars people component in three ways
+
+ First create a new file for these `app/starwars.cljs` and import required libraries.
+
+#+begin_src clojure
+(ns app.starwars
+  (:require [helix.core :refer [defnc $]]
+            [helix.dom :as d]))
+#+end_src
+
+*** Local variable for people
+
+#+begin_src clojure
+  (def people [{:name "Luke" :details "Luke's story"}
+               {:name "Chewbacca" :details "Chwebacca's story"}
+               {:name "C-3PO" :details "C-3PO's story"}])
+
+  (defnc People
+    []
+    ;; define state for selecting the detail
+    (let [[selected set-selected] (hooks/use-state nil)]
+      (d/div
+       (d/h1 "Starwars People")
+       (d/ul
+        ;; iterate over people and create <li>{name}</li> for each
+        (for [{:keys [name] :as person} people]
+          (d/li {:key name
+                 ;; on click detail, set the clicked person as selected
+                 :on-click #(set-selected person)} name)))
+       ;; if person selected show the details
+       (when selected
+         (d/div
+          (:details selected))))))
+#+end_src
+
+Import the starwars namespace into the core
+
+#+begin_src clojure
+  (ns app.core
+    (:require [helix.core :refer [defnc $]]
+              [helix.dom :as d]
+              ;; import the starwars
+              [app.starwars :as sw]
+              ["react" :as react]
+              ["react-dom/client" :as rdom]))
+#+end_src
+
+Replace the =App= with =sw/People=.
+
+#+begin_src clojure
+(defn ^:dev/after-load init
+  "This function is used in the `index.html`
+  to load the application."
+  []
+  (.render (react-root)
+           ;; `$` is a macro to make a React
+           ;; element out of the given component
+           ($ react/StrictMode ($ sw/People))))
+#+end_src
+
+*** Fetch people from SWAPI
+
+#+begin_src clojure
+  (ns app.starwars
+    (:require [helix.core :refer [defnc $]]
+              [helix.dom :as d]
+              ;; add hooks and pprint
+              [helix.hooks :as hooks]
+              [clojure.pprint :refer [pprint]]))
+
+    (defn fetch-people
+      "
+      Just a wrapper for
+
+      fetch(URL)
+         .then((response) => response.json())
+         .then((data) => console.log(data))"
+      []
+      (-> (js/fetch "https://swapi.dev/api/people")
+          (.then (fn [response] (.json response)))
+          (.then (fn [data]
+                   (js->clj data.results
+                            :keywordize-keys true)))))
+
+    (defnc PeopleFromAPI
+      []
+      (let [[people set-people] (hooks/use-state [])
+            [selected set-selected] (hooks/use-state nil)]
+
+        ;; React.useEffect
+        (hooks/use-effect
+         ;; run this hook only once
+         :once
+         (fn [] ;; fetch the people
+           (-> (fetch-people)
+               ;; and set-people with the result data
+               (.then set-people))))
+        (d/div
+         (d/h1 "Starwars People")
+         (d/ul
+          (for [{:keys [name] :as person} people]
+            (d/li {:key      name
+                   :on-click #(set-selected person)} name)))
+         (when selected
+           (d/pre
+            ;; think this as JSON.stringify(selected)
+            (with-out-str (pprint selected)))))))
+#+end_src
+
+Replace the =sw/People= with =sw/PeopleFromAPI=.
+
+#+begin_src clojure
+(defn ^:dev/after-load init
+  "This function is used in the `index.html`
+  to load the application."
+  []
+  (.render (react-root)
+           ;; `$` is a macro to make a React
+           ;; element out of the given component
+           ($ react/StrictMode ($ sw/PeopleFromAPI))))
+#+end_src
+
+*** Fetch people from SWAPI using react-query
+
+
+Install the library
+
+#+begin_src bash
+❯ npm install react-query
+#+end_src
+
+Import the library react-query, you can understand any JS library this way. Check for more details
+https://shadow-cljs.github.io/docs/UsersGuide.html#_using_npm_packages
+
+#+begin_src clojure
+
+    (ns app.starwars
+      (:require [helix.core :refer [defnc $]]
+                [helix.dom :as d]
+                [helix.hooks :as hooks]
+                [clojure.pprint :refer [pprint]]
+                ["@tanstack/react-query" :as react-query]))
+
+
+  (defn use-query
+    "create clojure wrapper for useQuery"
+    [query-key query-fn]
+    (let [result (react-query/useQuery
+                  ;; useQuery is expecting a JS object
+                  ;; instead of CLJS map
+                  #js {:queryFn  query-fn
+                       :queryKey (into-array query-key)})]
+      {:data result.data
+       :loading? result.isLoading}))
+
+
+      (defnc PeopleWithReactQuery
+        []
+        (let [[selected set-selected] (hooks/use-state nil)
+              ;; use react-query to handle the query state
+              {people :data loading? :loading?} (use-query ["people"] fetch-people)]
+          (if loading?
+            (d/div "Loading...")
+            (d/div
+             (d/h1 "Starwars People")
+             (d/ul
+              (for [{:keys [name] :as person} people]
+                (d/li {:key      name
+                       :on-click #(set-selected person)} name)))
+             (when selected
+               (d/pre
+                (with-out-str
+                  (pprint selected))))))))
+
+      ;; define the query client
+      (defonce query-client (react-query/QueryClient. ))
+
+      ;; wrap the component with QueryClientProvider
+      (defnc WrapQueryClient [{:keys [children]}]
+        ($ react-query/QueryClientProvider {:client query-client}
+           children))
+
+      ;; and it's a wrap
+      (defnc StarwarsApp []
+        ($ WrapQueryClient
+           ($ PeopleWithReactQuery)))
+#+end_src
+
+Replace the =sw/PeopleFromAPI= with =sw/StarWarsApp=.
+
+#+begin_src clojure
+(defn ^:dev/after-load init
+  "This function is used in the `index.html`
+  to load the application."
+  []
+  (.render (react-root)
+           ;; `$` is a macro to make a React
+           ;; element out of the given component
+           ($ react/StrictMode ($ sw/StarWarsApp))))
+#+end_src
