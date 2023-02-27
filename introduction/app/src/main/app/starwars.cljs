@@ -3,7 +3,16 @@
             [helix.dom :as d]
             [helix.hooks :as hooks]
             [clojure.pprint :refer [pprint]]
+            [clojure.string :as str]
             ["@tanstack/react-query" :as react-query]))
+
+;; utilities
+
+(defn filter-by-name [search people]
+  (filter (fn [person]
+            (str/includes? (:name person)
+                           search))
+          people))
 
 ;; Example # 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
