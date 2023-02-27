@@ -5,6 +5,7 @@
 ;; explain list ...js doesnt have it,
 ;; what can we do with it and to it
 ;; explain namespace 
+;; keyword (:)
 
 (comment
 
@@ -13,8 +14,9 @@
   ;; define variables
 
   (def number-variable 1)
-  ;; number-variable
-  ;; => 1
+
+  (= 2 (+ 1 1 ))
+  
 
   (def string-variable "variable")
   ;; string-variable
@@ -80,6 +82,7 @@
 
        ;; make sure that we have a connection to the browser
   (js/alert 1)
+
 
        ;; using the prefix `js/` allows us to access all the
        ;; javascript functionts and API's

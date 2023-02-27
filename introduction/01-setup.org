@@ -180,8 +180,11 @@ the logging in the browsers console.
  Lastly lets setup a connection between our application and our text editor.
 
  - Install =Calva= (vs code extension available)
- - =shift+ctrl+p=  > Connect to a running REPL server in your project
- - =(js/alert "hello from vscode")= and press =alt+enter=
+ - =shift+ctrl+p= (mac)shift+cmd+p   > Connect to a running REPL server in your project
+ - /app
+ - shadow-cljs
+ - :app || node-repl || brower-repl
+ - =(js/alert "hello from vscode")= and press =alt+enter= (mac)/ctrl+enter
 
    #+begin_src clojure
      (comment
@@ -212,7 +215,8 @@ the logging in the browsers console.
        (.appendChild (js/document.getElementById "app") el)
        ;; => #object[HTMLInputElement [object HTMLInputElement]]
 
-       ;; at this point an input element should have appeared in your browser
+       ;; Run each of them through the repl 
+       ;;at this point an input element should have appeared in your browser
 
        ;; lets update the value of that input
        (set! (.-value el) "some value from the browser")
