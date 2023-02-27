@@ -124,3 +124,25 @@
 (defnc StarwarsApp []
   ($ WrapQueryClient
      ($ PeopleWithReactQuery)))
+
+;; With filter
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defnc PeopleFiltering
+  []
+  ;; define state for selecting the detail
+  (let [[selected set-selected] (hooks/use-state nil)
+        [filter set-filter] (hooks/use-state "")]
+    (d/div
+     (d/h1 "Starwars People")
+     (d/input {:on-change (fn [e] (set-filter e.target.value))})
+     (d/ul
+      ;; iterate over people and create <li>{name}</li> for each
+      (for [{:keys [name] :as person} (filter-by-name filter people)]
+        (d/li {:key      name
+               ;; on click detail, set the clicked person as selected
+               :on-click #(set-selected person)} name)))
+     ;; if person selected show the details
+     (when selected
+       (d/div
+        (:details selected))))))

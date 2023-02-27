@@ -35,4 +35,11 @@
          :devtools {:http-root "out/test"
                     :http-port 3001}
          :compiler-options {:output-feature-set :es8}}
-  }}
+
+  :devcards {:target           :browser
+             :output-dir       "public/js/compiled"
+             :asset-path       "/js/compiled"
+             :compiler-options {:devcards           true
+                                :output-feature-set :es8}
+             :devtools {:after-load app.devcards/init!}
+             :modules {:dev {:entries [app.devcards]}}}}}
