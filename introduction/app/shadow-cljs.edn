@@ -28,4 +28,11 @@
          :http-port   3000
          :http-root   "public"
          ;; initialize devtools
-         :preloads    [devtools.preload]}}}}
+         :preloads    [devtools.preload]}}
+
+  :test {:target           :browser-test
+         :test-dir         "out/test"
+         :devtools {:http-root "out/test"
+                    :http-port 3001}
+         :compiler-options {:output-feature-set :es8}}
+  }}

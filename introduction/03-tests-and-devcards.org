@@ -1,0 +1,73 @@
+* Setup tests
+
+Add new build target called =:test= (this can be named however you choose)
+
+This configuration will serve our tests files in the browser localhost:3001
+
+#+begin_src clojure
+  {...
+   :builds {
+            ....
+            :test {:target           :browser-test
+                   :test-dir         "out/test"
+                   :devtools {:http-root "out/test"
+                              :http-port 3001}
+                   :compiler-options {:output-feature-set :es8}}
+            }}
+#+end_src
+
+
+
+* Add firsts test
+
+#+begin_src bash
+  ❯ mkdir -p src/test/app
+  ❯ touch src/test/app/starwars_test.cljs
+#+end_src
+
+#+begin_src clojure
+(ns app.starwars-test
+  (:require [cljs.test :refer [deftest testing is]]))
+
+(deftest test-example
+  (testing "assertion works"
+    (is (= 0 1))))
+#+end_src
+
+Now if you navigate to your =localhost:3001= you should see a
+view with a report of one failing test.
+
+Now lets assume that we need to create a filter function for the starwars people
+to be used in our component.
+
+#+begin_src clojure
+(deftest filter-by-name
+  (testing "filter by name works as expected"
+    (let [people [{:name "Luke"} {:name "Chewbacca"} {:name "C-3PO"}]
+          expected [{:name "Luke"}]]
+    (is (= expected
+           (sw/filter-by-name "uke" people))))))
+#+end_src
+
+And then write the implementation
+
+#+begin_src clojure
+
+  (ns app.starwars
+    (:require ...
+              [clojure.string :as str]))
+
+  (defn filter-by-name [search people]
+    (filter (fn [person]
+              (str/includes? (:name person)
+                             search))
+            people))
+#+end_src
+
+And now you should see one passing test in the report view.
+
+Now we want to add a input field to let the user use the filter
+
+Let's set some visual tools to help with this.
+
+* TODO Devcards
