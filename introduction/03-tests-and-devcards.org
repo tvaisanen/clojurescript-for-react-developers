@@ -38,7 +38,7 @@ Now if you navigate to your =localhost:3001= you should see a
 view with a report of one failing test.
 
 Now lets assume that we need to create a filter function for the starwars people
-to be used in our component.
+to be used in our component. Replace the =test-example= with the following.
 
 #+begin_src clojure
 (deftest filter-by-name
@@ -71,3 +71,7 @@ Now we want to add a input field to let the user use the filter
 Let's set some visual tools to help with this.
 
 * TODO Devcards
+
+#+begin_src bash
+  ❯ npm install showdown
+#+end_src
