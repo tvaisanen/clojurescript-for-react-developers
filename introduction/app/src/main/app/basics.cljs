@@ -1,4 +1,10 @@
 (ns app.basics)
+;; clojure lingo [js , clj] 
+;; array = vector
+;; object = map
+;; explain list ...js doesnt have it,
+;; what can we do with it and to it
+;; explain namespace 
 
 (comment
 

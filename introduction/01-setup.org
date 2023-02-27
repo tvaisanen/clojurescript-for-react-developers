@@ -10,8 +10,8 @@
 
 ** Takeaway
 
- Knowledge on how to get started with React in Clojure
- and how to get started.
+ Knowledge on how to get started and setup with React in Clojure.
+ Leave with a simple app in clojurescript.
 
 * Introduce Tools
 
@@ -29,6 +29,7 @@ Create a new project with =create-cljs-project=
 #+end_src
 
 This sets up the basic project folder structure.
+It should look like this: 
 
 #+begin_src bash
 app
@@ -178,7 +179,7 @@ the logging in the browsers console.
 
  Lastly lets setup a connection between our application and our text editor.
 
- - Install =Calva=
+ - Install =Calva= (vs code extension available)
  - =shift+ctrl+p=  > Connect to a running REPL server in your project
  - =(js/alert "hello from vscode")= and press =alt+enter=
 
