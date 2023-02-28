@@ -102,7 +102,8 @@ Import the starwars namespace into the core
   (ns app.core
     (:require [helix.core :refer [defnc $]]
               [helix.dom :as d]
-              ;; import the starwars
+              ;; import the starwars and  hooks
+              [helix.hooks :as hooks]
               [app.starwars :as sw]
               ["react" :as react]
               ["react-dom/client" :as rdom]))
@@ -127,17 +128,16 @@ Replace the =App= with =sw/People=.
   (ns app.starwars
     (:require [helix.core :refer [defnc $]]
               [helix.dom :as d]
-              ;; add hooks and pprint
               [helix.hooks :as hooks]
+              ;;add print 
               [clojure.pprint :refer [pprint]]))
 
     (defn fetch-people
-      "
-      Just a wrapper for
-
+      "Just a wrapper for
       fetch(URL)
          .then((response) => response.json())
          .then((data) => console.log(data))"
+
       []
       (-> (js/fetch "https://swapi.dev/api/people")
           (.then (fn [response] (.json response)))
@@ -189,7 +189,7 @@ Replace the =sw/People= with =sw/PeopleFromAPI=.
 Install the library
 
 #+begin_src bash
-❯ npm install react-query
+❯ npm i @tanstack/react-query
 #+end_src
 
 Import the library react-query, you can understand any JS library this way. Check for more details
@@ -203,6 +203,7 @@ https://shadow-cljs.github.io/docs/UsersGuide.html#_using_npm_packages
                 [helix.hooks :as hooks]
                 [clojure.pprint :refer [pprint]]
                 ["@tanstack/react-query" :as react-query]))
+
 
 
   (defn use-query
@@ -221,6 +222,7 @@ https://shadow-cljs.github.io/docs/UsersGuide.html#_using_npm_packages
         []
         (let [[selected set-selected] (hooks/use-state nil)
               ;; use react-query to handle the query state
+              ;; use fetch-people from previous example
               {people :data loading? :loading?} (use-query ["people"] fetch-people)]
           (if loading?
             (d/div "Loading...")
