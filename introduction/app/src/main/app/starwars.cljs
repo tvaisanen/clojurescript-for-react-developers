@@ -1,18 +1,11 @@
 (ns app.starwars
-  (:require [helix.core :refer [defnc $]]
+ (:require [helix.core :refer [defnc $]]
             [helix.dom :as d]
             [helix.hooks :as hooks]
             [clojure.pprint :refer [pprint]]
             [clojure.string :as str]
             ["@tanstack/react-query" :as react-query]))
 
-;; utilities
-
-(defn filter-by-name [search people]
-  (filter (fn [person]
-            (str/includes? (:name person)
-                           search))
-          people))
 
 ;; Example # 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -128,6 +121,12 @@
 ;; With filter
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn filter-by-name [search people]
+  (filter (fn [person]
+            (str/includes? (str/lower-case (:name person))
+                           (str/lower-case search)))
+          people))
+
 (defnc PeopleFiltering
   []
   ;; define state for selecting the detail
@@ -136,6 +135,7 @@
     (d/div
      (d/h1 "Starwars People")
      (d/input {:on-change (fn [e] (set-filter e.target.value))})
+     (d/p "Searching for: " filter)
      (d/ul
       ;; iterate over people and create <li>{name}</li> for each
       (for [{:keys [name] :as person} (filter-by-name filter people)]

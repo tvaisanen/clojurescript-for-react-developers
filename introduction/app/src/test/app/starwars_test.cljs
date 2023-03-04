@@ -4,11 +4,18 @@
             [devcards.core :as dc :include-macros true]
             [app.starwars :as sw]))
 
+(dc/defcard people
+  [{:name "Luke"} {:name "Chewbacca"} {:name "C-3PO"}])
+
 (dc/deftest filter-by-name
-  (testing "filter by name works as expected"
-    (is (= [{:name "Luke"}]
-           (sw/filter-by-name "uke" [{:name "Luke"} {:name "Chewbacca"} {:name "C-3PO"}])))))
+  (let [people [{:name "Luke"} {:name "Chewbacca"} {:name "C-3PO"}]]
+    (testing "filter by name works as expected"
+      (is (= [{:name "Luke"}]
+             (sw/filter-by-name "uke" people))))
+    (testing "filter by name works case insensitive"
+      (is (= [{:name "Luke"}]
+             (sw/filter-by-name "luke" people))))))
 
 
-(dc/defcard FOO
+(dc/defcard PeopleWithFiltering
   ($ sw/PeopleFiltering))

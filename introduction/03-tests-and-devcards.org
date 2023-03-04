@@ -73,5 +73,54 @@ Let's set some visual tools to help with this.
 * TODO Devcards
 
 #+begin_src bash
+  ❯ mkdir src/dev/app
+  ❯ touch src/dev/app/devcards.cljs
+#+end_src
+
+#+begin_src clojure
+(ns app.devcards
+  (:require [devcards.core :as dc :include-macros true]
+            ;; load the namespaces with devcards
+            [app.starwars-test]))
+
+(defn ^:dev/after-load start! []
+  (dc/start-devcard-ui!))
+
+(defn init! [] (start!))
+
+(init!)
+#+end_src
+
+Add devcards to shadow-cljs dependencies for "storybook" like features.
+
+#+begin_src clojure
+  {...
+   :dependencies [...
+                  [devcards "0.2.5"]]
+   :builds {...
+            {:target           :browser
+             :output-dir       "public/js/compiled"
+             :asset-path       "/js/compiled"
+             :compiler-options {:devcards           true
+                                :output-feature-set :es8}
+             :devtools {:after-load app.devcards/init!}
+             :modules {:dev {:entries [app.devcards]}}}
+#+end_src
+
+Install devcards javascript dependencies.
+
+#+begin_src bash
   ❯ npm install showdown
+#+end_src
+
+And lastly create a new html file for loading the devcards separate from the app itself.
+
+#+begin_src html
+<!DOCTYPE html>
+<html>
+    <body>
+        <div id="app"/>
+        <script src="/js/compiled/dev.js" type="text/javascript"></script>
+    </body>
+</html>
 #+end_src
