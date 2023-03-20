@@ -142,13 +142,13 @@ And finally lets configure the build to emit the =main.js= file from Clojure sou
           :output-dir "public/js/compiled"
           :asset-path "/js/compiled"
           ;; modules created from Clojurescript sources
-          :modules {:main {:entries [core.app]}}
+          :modules {:main {:entries [app.core]}}
           ;; set up development related configuration
           :devtools
           ;; before live-reloading any code call this function
-          {:before-load core.app/stop
+          {:before-load app.core/stop
            ;; after live-reloading finishes call this function
-           :after-load  core.app/start
+           :after-load  app.core/start
            ;; serve the public directory over http at port 3000
            :http-port   3000
            :http-root   "public"
@@ -180,11 +180,11 @@ the logging in the browsers console.
  Lastly lets setup a connection between our application and our text editor.
 
  - Install =Calva= (vs code extension available)
- - =shift+ctrl+p= (mac)shift+cmd+p   > Connect to a running REPL server in your project
+ - =shift+ctrl+p= (mac) =shift+cmd+p=   > Connect to a running REPL server in your project
  - /app
  - shadow-cljs
  - :app || node-repl || brower-repl
- - =(js/alert "hello from vscode")= and press =alt+enter= (mac)/ctrl+enter
+ - =(js/alert "hello from vscode")= and press =alt+enter= (mac) =ctrl+enter=
 
    #+begin_src clojure
      (comment
