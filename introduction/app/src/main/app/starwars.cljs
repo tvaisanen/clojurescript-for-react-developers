@@ -6,7 +6,6 @@
             [clojure.string :as str]
             ["@tanstack/react-query" :as react-query]))
 
-
 ;; Example # 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

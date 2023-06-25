@@ -202,4 +202,37 @@
   (js->clj #js {:a 2} :keywordize-keys true)
   ;; => {:a 2}
 
+  (+ 1)
+
+  (set! *print-fn-bodies* true)
+
+  (defn hello-world []
+    (println "Hello, World!"))
+;; => [#object[app$basics$hello_world ]]
+
+
+  (defmulti shape :shape)
+
+  (defmethod shape :circle [_s]
+    :is-a-circle)
+
+  (defmethod shape :square [_s]
+    :is-a-square)
+
+
+  (shape {:shape :circle})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   )

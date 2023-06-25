@@ -1,8 +1,9 @@
-* Setup tests
+** Setup Testing
 
-Add new build target called =:test= (this can be named however you choose)
-
-This configuration will serve our tests files in the browser localhost:3001
+First ew need to setup a test runner.
+Add new build target called for the tests.
+This configuration sets up the tests so that we get a
+test runner in the browser at localhost:3001
 
 #+begin_src clojure
   {...
@@ -16,14 +17,16 @@ This configuration will serve our tests files in the browser localhost:3001
             }}
 #+end_src
 
-
-
-* Add firsts test
+Start by creating the folder for =app= tests and the first test file.
 
 #+begin_src bash
   ❯ mkdir -p src/test/app
   ❯ touch src/test/app/starwars_test.cljs
 #+end_src
+
+Test files are just Clojure files that use the
+testing libraries. Here we import a few test functions/macros
+that are meant for defining tests and for assertion.
 
 #+begin_src clojure
 (ns app.starwars-test
@@ -32,6 +35,13 @@ This configuration will serve our tests files in the browser localhost:3001
 (deftest test-example
   (testing "assertion works"
     (is (= 0 1))))
+#+end_src
+
+Start the test runner in watch mode to make the tests
+run on file changes.
+
+#+begin_src bash
+ $ npx shadow-cljs watch :test
 #+end_src
 
 Now if you navigate to your =localhost:3001= you should see a
@@ -70,12 +80,21 @@ Now we want to add a input field to let the user use the filter
 
 Let's set some visual tools to help with this.
 
-* TODO Devcards
+** Devcards
+
+ Devcards is a Clojurescript library that allows us to render
+ our components outside the application context and it provides
+ a catalog of these components that can be used as development
+ environment.
+ Let's set up the rendering for devcards under =src/dev=.
 
 #+begin_src bash
   ❯ mkdir src/dev/app
   ❯ touch src/dev/app/devcards.cljs
 #+end_src
+
+Configure the devcards to re-render on $\mintinline{clojure}{^:dev/after-load}$
+as we did earlier for the application.
 
 #+begin_src clojure
 (ns app.devcards
@@ -123,4 +142,60 @@ And lastly create a new html file for loading the devcards separate from the app
         <script src="/js/compiled/dev.js" type="text/javascript"></script>
     </body>
 </html>
+#+end_src
+
+Create the new component with filtering.
+
+#+begin_src clojure
+(defnc PeopleFiltering
+  []
+  ;; define state for selecting the detail
+  (let [[selected set-selected] (hooks/use-state nil)
+        [filter set-filter] (hooks/use-state "")]
+    (d/div
+     (d/h1 "Starwars People")
+     (d/input {:on-change (fn [e] (set-filter e.target.value))})
+     (d/p "Searching for: " filter)
+     (d/ul
+      ;; iterate over people and create <li>{name}</li> for each
+      (for [{:keys [name] :as person} (filter-by-name filter people)]
+        (d/li {:key      name
+               ;; on click detail, set the clicked person as selected
+               :on-click #(set-selected person)} name)))
+     ;; if person selected show the details
+     (when selected
+       (d/div
+        (:details selected))))))
+#+end_src
+
+Now we can write our first devcard.
+
+#+attr_latex: :options linenos
+#+begin_src clojure
+  (ns app.starwars-test
+    (:require [cljs.test :refer [testing is]]
+              [helix.core :refer [$]]
+              [devcards.core :as dc :include-macros true]
+              [app.starwars :as sw]))
+
+  (def people [{:name "Luke"} {:name "Chewbacca"} {:name "C-3PO"}]
+
+  ;; describe the data
+  (dc/defcard people
+    people)
+
+  ;; use dc/deftest instead of cljs.test to
+  ;; render the test results with the devcards
+  (dc/deftest filter-by-name
+    (let [people [{:name "Luke"} {:name "Chewbacca"} {:name "C-3PO"}]]
+      (testing "filter by name works as expected"
+        (is (= [{:name "Luke"}]
+               (sw/filter-by-name "uke" people))))
+      (testing "filter by name works case insensitive"
+        (is (= [{:name "Luke"}]
+               (sw/filter-by-name "luke" people))))))
+
+  ;; Render the component under development
+  (dc/defcard PeopleWithFiltering
+    ($ sw/PeopleFiltering))
 #+end_src

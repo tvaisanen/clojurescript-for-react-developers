@@ -1,0 +1,376 @@
+* What is Clojure(Script)
+
+Clojure is a general dynamic functional programming language that can
+be used to build fullstack web applications.
+
+#+begin_quote
+Clojure is a dynamic, general-purpose programming language, combining the approachability and interactive development of a scripting language with an efficient and robust infrastructure for multithreaded programming. Clojure is a compiled language, yet remains completely dynamic – every feature supported by Clojure is supported at runtime. Clojure provides easy access to the Java frameworks, with optional type hints and type inference, to ensure that calls to Java can avoid reflection. [fn:https://clojure.org]
+#+end_quote
+
+And Clojurescript is the version that compiles to JS.
+
+#+begin_quote
+ClojureScript is a compiler for Clojure that targets JavaScript. It emits JavaScript code which is compatible with the advanced compilation mode of the Google Closure optimizing compiler. [fn:https://clojurescript.org]
+#+end_quote
+
+* Who is This Book For?
+
+This book is meant for developers who have background in React web development
+and are interested in learning Clojure. React experience is not a must but
+the book doesn't go into details on how React works. Only how to use it
+with Clojure. Some of the concepts are explained with JS examples translated
+to Clojure and vice versa.
+
+After reading this book and you should be able to get started in
+Clojurescript web development using the common JS libraries.
+There's also a wealth of information and useful tools in the Clojure
+ecosystem that are not covered in this book and my hope is that
+getting started on the route with more traditional JS-like approach
+you get curious about all the other aspects as well.
+
+
+* Prerequisites
+
+  To be able to follow along you should have a working *node* installation configured on your machine
+  and an editor of your choice. A brief explanation is provided how to setup VSCode and Calva to
+  interact with the REPL.
+
+  So make sure that you have:
+  - Installed Node
+  - Installed VSCode
+  - Installed the VSCode Calva extension
+
+  Of course you can use editor of your choice.
+  Intellij has Cursive a popular pluging for Clojure.
+  Emacs users use CIDER and for VIM there's fireplace.
+  Here we'll be setting up Calva because VSCode's popularity among React devs.
+* Clojure: a Quick Tour
+
+Let's fire up a REPL in the terminal so you can follow along with the examples.
+
+#+begin_src bash
+  $ npx create-cljs-project app
+  $ cd app
+  $ npx shadow-cljs node-repl
+#+end_src
+
+** Namespaces
+
+Clojure code is organized in =namespaces= which
+can be thought of as modules in other languages.
+Namespace is declared with a =ns= macro.
+
+#+begin_src clojure
+(ns namespace-name)
+#+end_src
+
+If you are following along in the REPL you might have noticed
+that the =cljs.user= in the prompt changed to =namespace-name=.
+
+#+begin_src clojure
+cljs.user=> (ns namespace-name)
+nil
+namespace-name=>
+#+end_src
+
+Namespace can have have a docstring as an optional second argument.
+
+#+begin_src clojure :label namespace-01
+  (ns namespace-name
+    "Docstring for the namespace")
+#+end_src
+
+As in Javascript and Typescript you can import code from other modules.
+
+#+begin_src clojure
+  (ns namespace-name
+    "Docstring for the namespace"
+    :require [other-namespace :as other])
+
+  ;; use function from another namespace
+  (other/function arg1)
+#+end_src
+
+You can use available JS modules by importing them as you would in JS
+by using the quoted library name when requiring the module.
+
+#+begin_src clojure
+  (ns namespace-name
+    "Docstring for the namespace"
+    :require [other-namespace :as other]
+             ["axios" :as axios])
+
+  ;; use JS modules similarly
+  (axios/get "url...")
+#+end_src
+
+Read more about namespaces from the official [[https://clojure.org/reference/namespaces][reference ]]and differences
+between Clojurescript and Clojure [[https://clojurescript.org/guides/ns-forms][namespaces]].
+
+** Variables
+
+In Clojure variables are defined with =def= macro.
+
+#+begin_src clojure
+  (def one 1)
+  (def hello "hello world")
+#+end_src
+
+After the variables are defined they can be used as expected.
+#+begin_src clojure
+  (inc one)
+  ;; => 2
+#+end_src
+
+** Data Types
+
+  A quick look at the basic data structures in Clojure.
+  This is in no means an exhaustive list of what's available.
+  Refer to the official documentation for complete picture.
+
+*** Maps
+#+begin_src clojure
+  (def number-variable 1)
+  ;; number-variable
+  ;; => 1
+#+end_src
+
+#+begin_src clojure
+  (def string-variable "variable")
+  ;; string-variable
+  ;; => "variable"
+#+end_src
+
+Maps are hash maps comparable to objects in JS.
+
+#+begin_src clojure
+  (def map-variable {:a 1 :b 2})
+  ;; map-variable
+  ;; => {:a 1, :b 2}
+#+end_src
+
+To get values from a map you can use =get= with or without a default in the case that the value is not found.
+This is similar to pythons =object.get=
+
+#+begin_src clojure
+  (get map-variable :a)
+  ;; => 1
+
+  (get map-variable :c :not-found)
+  ;; => :not-found
+#+end_src
+
+The value can also be obtained with they keyword as a function or the map itself as a function applied with the keyword.
+#+begin_src clojure
+
+  ;; use the key as a function to get the value
+  (:a map-variable)
+  ;; => 1
+  ;; or use the map as a function to get the value
+  (map-variable :a)
+  ;; => 1
+#+end_src
+
+To remove value from a map use =dissoc= but remember that this do not alter the original map, it returns a new value of existing parameters minus the removed parameter.
+
+#+begin_src clojure
+  (dissoc map-variable :b)
+  ;; => {:a 1}
+#+end_src
+
+*** Vectors
+
+  Vectors in Clojure are like arrays in Javascript.
+  Clojure also has lists but we'll concentrate just on the arrays
+  in this context. Vectors are defined with brackets =[]= and lists with parenthesis ().
+
+#+begin_src clojure
+  (def vector-variable [1 2 3])
+#+end_src
+
+  We can retrieve a value in and index with =get=.
+
+#+begin_src clojure
+  (get vector-variable 0)
+  ;; => 1
+#+end_src
+
+ You can map a function over a vector similarly as you do in JS.
+
+ For example the following JS would translate into
+
+ #+begin_src javascript
+   [1,2,3].map(value => value + 1)
+ #+end_src
+
+ the following.
+
+#+begin_src clojure
+  (map inc vector-variable)
+  ;; => (2 3 4)
+#+end_src
+
+  In Clojure we do not use the dot notation to access the prototype's methods,
+  but we use a dedicated function =map= and declare all the arguments.
+  Technically you could do this by using JS interop from Clojurescript, but
+  in this case you would not be using the Clojure data structures.
+
+  I'll add an example here as a sneak peak and we'll talk more abou the
+  JS interop a bit later.
+
+
+  #+begin_src clojure
+    ;; array creates a JS array in Clojurescript
+    ;; and by using .map we are using the method of this array
+    (.map (array 1 2 3) (fn [value] (+ value 1)))
+    ;; => [2 3 4]
+  #+end_src
+  #+begin_src javascript
+  // Compiled JS
+  [(1),(2),(3)].map((function (value){return (value + (1));}));
+  #+end_src
+
+  But let's get back on the topic. Similarly as with =map=
+  we can =filter= and =reduce= vectors.
+
+#+begin_src clojure
+  (filter odd? [1 2 3])
+  ;; => (1 3)
+
+  (reduce + [1 2 3])
+  ;; => 6
+
+  (reduce + 10 [1 2 3])
+  ;; => 16
+#+end_src
+
+  Clojure has threading macros that helps chaining
+  this type of operations together.
+
+#+begin_src clojure
+  (->> [1 2 3]
+       (map inc)
+       (filter even?))
+  ;; => (2 4)
+#+end_src
+
+  Which in practice translates to following.
+
+#+begin_src clojure
+      (filter even? (map inc [1 2 3]))
+#+end_src
+
+  We can evaluate the above expression with =macroexpand= function
+  To confirm that it is equivalent.
+
+  #+begin_src clojure
+  (macroexpand
+   '(->> [1 2 3]
+         (map inc)
+         (filter even?)))
+  ;; => (filter even? (map inc [1 2 3]))
+  #+end_src
+
+  Read more about threading macros in the [[https://clojure.org/guides/threading_macros][threading macro guide]].
+
+
+** Functions
+
+Functions are defined with $\mintinline{clojure}{defn}$ macro.
+
+#+begin_src clojure
+  (defn hello-world []
+    (println "Hello, World!"))
+#+end_src
+
+We can inspect the produced Javascript by setting the dynamic variable
+$\mintinline{clojure}{*print-fn-bodies*}$ to true.
+
+#+begin_src clojure
+  cljs.user=> (set! *print-fn-bodies* true)
+
+  true
+
+  cljs.user=> (defn hello-world []
+                (println "Hello, World!"))
+
+  [#object[cljs$user$hello_world
+           "function cljs$user$hello_world(){
+              return cljs.core.println.call(null,"Hello, World!");
+           }"]]
+#+end_src
+
+As you can see from the output the result is plain old javascript that uses
+CLJS core library println function to do the printing.
+
+#+begin_src javascript
+function hello_world(){
+    return cljs.core.println.call(null,"Hello, World!");
+}
+#+end_src
+
+This is a good way to get familiar on what is happening behind the scenes.
+Now, let's do explore more about functions. Function arguments are defined in the vector.
+
+#+begin_src clojure
+  (defn hello [name]
+    (println (str "Hello " name))
+#+end_src
+
+Functions can be anonymous and functions can return functions
+
+#+begin_src clojure
+  (defn hello-to [name]
+    (fn [] (str "Hello " name))
+
+  (def hello-to-you (hello-to "you"))
+
+  (with-out-str (hello-to-you))
+  ;; => "Hello you"
+#+end_src
+
+Anonymous functions can be declared with a reader macro =#=
+
+#+begin_src clojure
+  (defn hello-to [name]
+    #(str "Hello " %))
+
+  (def hello-to-you (hello-to "you"))
+
+  (with-out-str (hello-to-you))
+  ;; => "Hello you"
+#+end_src
+
+=with-out-str= is a macro that captures the standard
+output input from a function and returns the captured values
+as an input so we can inspect the printed charactecs as values.
+
+If we evalue the anynomous function created with # we can see that the arity is
+generated based on the number of arguments in the function body
+
+#+begin_src clojure
+  cljs.user=> (def add #(+ %1 %2))
+#+end_src
+
+#+begin_src javascript
+  function cljs$user$add(p1__25209_SHARP_,p2__25210_SHARP_){
+      return (p1__25209_SHARP_ + p2__25210_SHARP_);
+  }
+#+end_src
+
+By adding an extra arg it's reflected on the argument list.
+
+#+begin_src clojure
+  cljs.user=> (def add #(+ %1 %2 %3))
+#+end_src
+
+#+begin_src javascript
+      function cljs$user$add(p1__25214_SHARP_,
+                             p2__25215_SHARP_,
+                             p3__25216_SHARP_){
+          return ((p1__25214_SHARP_ + p2__25215_SHARP_) + p3__25216_SHARP_);
+      }
+#+end_src
+
+There's still a lot to cover in Clojure but this should
+be enough for us to get you started on the React side of things.

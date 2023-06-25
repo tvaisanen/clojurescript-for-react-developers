@@ -16,6 +16,5 @@
       (is (= [{:name "Luke"}]
              (sw/filter-by-name "luke" people))))))
 
-
 (dc/defcard PeopleWithFiltering
   ($ sw/PeopleFiltering))

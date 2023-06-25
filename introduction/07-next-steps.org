@@ -1,0 +1,5 @@
+* Outro
+
+Now that we've gone through all this it's time to
+wrap up and give you some pointers where to go next
+with your Clojure adventure.

@@ -1,0 +1,7 @@
+* State Management
+
+Since you've coming from React you have probably asked
+the question but "what about redux?" and by now
+you have all the know-how how to use Redux in the case
+you really want to. What I'm going to do, is to introduce
+you to the Clojure way of doing state management.

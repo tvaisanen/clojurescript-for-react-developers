@@ -1,99 +1,231 @@
-* Setup React
+* Configure React
 
-Add helix (react wrapper) to  your dependencies
+We'll be using the Helix library as our React wrapper of
+choice and there's a reason for this.
+This is only a thin layer of
+Clojurescript to interact with the React API so there's
+no extra complexity introduced. It is common to use Reagent
+that is another Clojurescript React wrapper that introduces
+it's own philosophy and quirks. For now, it's enough that
+you know it exists but no need to delve any deeper at this
+point.
+
+** Installing dependencies
+
+ The only Clojurescript dependency we need to get started with
+ is Helix, add it to your dependencies in =shadow-cljs.edn= file.
+ You can find the latest version from https://clojars.org/lilactown/helix.
 
 #+begin_src clojure
   {...
    :dependencies [[binaryage/devtools "0.9.7"]
                   [cider/cider-nrepl "0.28.1"]
                   ;; React wrapper
-                  [lilactown/helix "0.1.5"] ...}
+                  [lilactown/helix "0.1.10"] ...}
 #+end_src
+
+ We also need the matching JS counterpart =react= and =react-dom=.
 
 #+begin_src bash
-❯ npm install react react-dom
+$ npm install react react-dom
 #+end_src
 
-and restart the development server to load the new dependencies
+Clojurescript dependencies can be loaded dynamically but for
+us to have access to the updated JS dependecies we need to
+restart our development server.
 
 ** Setup React Rendering
 
+Let's start by creating a new file for utility functions
+where we define our render function we can use to mount
+our application into the DOM.
+
+# #+caption: utils.cljs
+#+attr_latex: :options linenos
+#+name: utils-cljs
+#+include: app/src/main/app/utils.cljs src clojure
+
+I'll explain the steps we took starting from the bottom.
+Line 16 defines a render function that takes a React component
+as the only argument that will be mounted as the application root
+wrapped in =React.StrictMode= and then we are calling the render
+method of react-root created with =react-dom/client= modules =createRoot=
+function.
+
+We get the root instance with =react-root= function defined on line =11=.
+It initializes the value in the root atom we defined if the value is
+not already initialized and then returning it. Clojure reference
+describes atoms as:
+
+#+begin_quote
+Atoms provide a way to manage shared, synchronous, independent state.
+They are a reference type like refs and vars.
+...
+Changes to atoms are always free of race conditions.
+
+https://clojure.org/reference/atoms
+#+end_quote
+
+On the line =9= we define a variable =root= with defonce that defines
+a variable if and only if the value is not already defined.
+
 #+begin_src clojure
-    (ns app.core
-    (:require [helix.core :refer [defnc $]]
-              [helix.dom :as d]
-              ["react" :as react]
-              ["react-dom/client" :as rdom]))
+cljs.user=> (defonce once 1)
+[1]
+cljs.user=> (defonce once 2)
+nil
+#+end_src
 
-  ;; `defnc` macro creates a react component
-  ;;
-  ;; const App = () => {
-  ;;   return <div>This is a React component.</div
-  ;; }
-  ;;
-  (defnc App []
-    (d/div "This is a React component."))
+In practice we are creating a singleton "instance" for react-root
+that is accessed by calling the =react-root= function.
+=helix.core/$= is a macro that renders make a React element
+out of the given component but let's explore that in moment!
 
-  ;; const appContainer = () =>  document.getElementbyId("app")
-  (defn app-container []
-    (js/document.getElementById "app"))
-
-  (defonce root (atom nil))
-
-  (defn react-root []
-    (when-not @root
-      ;; createRoot should be done only once so
-      ;; let's store the reference to `root`
-      ;; if not already exist
-      (reset! root (rdom/createRoot (app-container))))
-    @root)
-
-  ;; add ^:dev/after-load to re-mount the app on file change
-  ;; OR update the shadow-cljs.edn config file to run
-  ;; app.core.init on after-load
+#+begin_src clojure
   (defn ^:dev/after-load init
     "This function is used in the `index.html`
     to load the application."
     []
     (.render (react-root)
-             ;; `$` is a macro to make a React
-             ;; element out of the given component
              ($ react/StrictMode ($ App))))
 #+end_src
 
-** Lets build a Star Wars people component in three ways
+Now that we have the rendering covered we can create
+the first component, =App=.
 
- First create a new file for these `app/starwars.cljs` and import required libraries.
-
+#+attr_latex: :options linenos
 #+begin_src clojure
-(ns app.starwars
-  (:require [helix.core :refer [defnc $]]
-            [helix.dom :as d]))
+  (ns app.core
+    (:require [helix.core :refer [defnc $]]
+              [helix.dom :as d]
+              ;; import the namespace (module)
+              ;; with the render function
+              [app.utils :as utils]))
+
+  (defnc App []
+    (d/div "This is a React component."))
+
+  (defn ^:dev/after-load init []
+    ;;
+    (utils/render ($ App)))
 #+end_src
 
-*** Local variable for people
+Here the =defnc= macro on the creates a =React.FunctionalComponent=
+that we can then render with the =$= macro.
+Our init function has the meta =^:dev/after-load= keyword
+to tell =shadow-cljs= that whenever the source files are loaded
+this should be evaluated.
+The =App= components produces the same results as the following React component.
+
+#+begin_src javascript
+  const App = () => {
+    return <div>This is a React component.</div>
+  }
+#+end_src
+
+Evaluating our =App= creates a valid React type.
 
 #+begin_src clojure
-  (def people [{:name "Luke" :details "Luke's story"}
-               {:name "Chewbacca" :details "Chwebacca's story"}
-               {:name "C-3PO" :details "C-3PO's story"}])
+  => App
+#+end_src
 
-  (defnc People
-    []
-    ;; define state for selecting the detail
-    (let [[selected set-selected] (hooks/use-state nil)]
-      (d/div
-       (d/h1 "Starwars People")
-       (d/ul
-        ;; iterate over people and create <li>{name}</li> for each
-        (for [{:keys [name] :as person} people]
-          (d/li {:key name
-                 ;; on click detail, set the clicked person as selected
-                 :on-click #(set-selected person)} name)))
-       ;; if person selected show the details
-       (when selected
-         (d/div
-          (:details selected))))))
+#+begin_src javascript
+  function app$core$App_render(props__12584__auto__,maybe_ref__12585__auto__){
+      var vec__25299 = new cljs.core.PersistentVector(
+          null,
+          2,
+          5,
+          cljs.core.PersistentVector.EMPTY_NODE,
+          [helix.core.extract_cljs_props.call(
+              null,
+              props__12584__auto__),
+           maybe_ref__12585__auto__],
+          null);
+
+      return helix
+          .core
+          .get_react
+          .call(null)
+          .createElement("div",null,"This is a React component.");
+  }
+#+end_src
+
+Create a new React element from a valid React type.
+
+#+begin_src clojure
+  => ($ App)
+  {"$$typeof" "Symbol(react.element)",
+   "type" #object[app$core$App_render],
+   "key" nil,
+   "ref" nil,
+   "props" #js {},
+   "_owner" nil,
+   "_store" #js {}}
+#+end_src
+
+And if we compare this to the JS
+
+#+begin_src javascript
+  const react = require("react");
+
+  const App = () => {
+      return react.createElement("div", null, "This is a React component");
+  };
+
+  console.log(App);
+  console.log(App());
+
+  [Function: App]
+  {
+    '$$typeof': Symbol(react.element),
+    type: 'div',
+    key: null,
+    ref: null,
+    props: { children: 'This is a React component' },
+    _owner: null,
+    _store: {}
+  }
+#+end_src
+
+ We can see how these relate.
+
+** Simple List App
+
+#+COMMENT: make this as a simple list app
+
+First create a new file for these `app/starwars.cljs` and import required libraries.
+
+#+attr_latex: :options linenos
+#+begin_src clojure
+  (ns app.starwars
+    (:require [helix.core :refer [defnc $]]
+              [helix.dom :as d]))
+
+    ;; Let's start with listing the characters in a variable and
+    (def people [{:name "Luke" :details "Luke's story"}
+                 {:name "Chewbacca" :details "Chwebacca's story"}
+                 {:name "C-3PO" :details "C-3PO's story"}])
+
+
+    ;; Create React.FunctionalComponent
+    (defnc People
+      []
+      ;; define state for selecting the detail
+      ;; hooks/use-state is a wrapper for React.useState
+      ;; we could also use React.useState here and it would work
+      (let [[selected set-selected] (hooks/use-state nil)]
+        (d/div
+         (d/h1 "Starwars People")
+         (d/ul
+          ;; iterate over people and create <li>{name}</li> for each
+          (for [{:keys [name] :as person} people]
+            (d/li {:key name
+                   ;; on click detail, set the clicked person as selected
+                   :on-click #(set-selected person)} name)))
+         ;; if person selected show the details
+         (when selected
+           (d/div
+            (:details selected))))))
 #+end_src
 
 Import the starwars namespace into the core
@@ -123,6 +255,7 @@ Replace the =App= with =sw/People=.
 
 *** Fetch people from SWAPI
 
+#+attr_latex: :options linenos
 #+begin_src clojure
   (ns app.starwars
     (:require [helix.core :refer [defnc $]]
@@ -181,83 +314,4 @@ Replace the =sw/People= with =sw/PeopleFromAPI=.
            ;; `$` is a macro to make a React
            ;; element out of the given component
            ($ react/StrictMode ($ sw/PeopleFromAPI))))
-#+end_src
-
-*** Fetch people from SWAPI using react-query
-
-
-Install the library
-
-#+begin_src bash
-❯ npm install react-query
-#+end_src
-
-Import the library react-query, you can understand any JS library this way. Check for more details
-https://shadow-cljs.github.io/docs/UsersGuide.html#_using_npm_packages
-
-#+begin_src clojure
-
-    (ns app.starwars
-      (:require [helix.core :refer [defnc $]]
-                [helix.dom :as d]
-                [helix.hooks :as hooks]
-                [clojure.pprint :refer [pprint]]
-                ["@tanstack/react-query" :as react-query]))
-
-
-  (defn use-query
-    "create clojure wrapper for useQuery"
-    [query-key query-fn]
-    (let [result (react-query/useQuery
-                  ;; useQuery is expecting a JS object
-                  ;; instead of CLJS map
-                  #js {:queryFn  query-fn
-                       :queryKey (into-array query-key)})]
-      {:data result.data
-       :loading? result.isLoading}))
-
-
-      (defnc PeopleWithReactQuery
-        []
-        (let [[selected set-selected] (hooks/use-state nil)
-              ;; use react-query to handle the query state
-              {people :data loading? :loading?} (use-query ["people"] fetch-people)]
-          (if loading?
-            (d/div "Loading...")
-            (d/div
-             (d/h1 "Starwars People")
-             (d/ul
-              (for [{:keys [name] :as person} people]
-                (d/li {:key      name
-                       :on-click #(set-selected person)} name)))
-             (when selected
-               (d/pre
-                (with-out-str
-                  (pprint selected))))))))
-
-      ;; define the query client
-      (defonce query-client (react-query/QueryClient. ))
-
-      ;; wrap the component with QueryClientProvider
-      (defnc WrapQueryClient [{:keys [children]}]
-        ($ react-query/QueryClientProvider {:client query-client}
-           children))
-
-      ;; and it's a wrap
-      (defnc StarwarsApp []
-        ($ WrapQueryClient
-           ($ PeopleWithReactQuery)))
-#+end_src
-
-Replace the =sw/PeopleFromAPI= with =sw/StarWarsApp=.
-
-#+begin_src clojure
-(defn ^:dev/after-load init
-  "This function is used in the `index.html`
-  to load the application."
-  []
-  (.render (react-root)
-           ;; `$` is a macro to make a React
-           ;; element out of the given component
-           ($ react/StrictMode ($ sw/StarWarsApp))))
 #+end_src

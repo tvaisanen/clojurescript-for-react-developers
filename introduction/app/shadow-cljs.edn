@@ -17,7 +17,9 @@
         :output-dir "public/js/compiled"
         :asset-path "/js/compiled"
         ;; modules created from Clojurescript sources
-        :modules    {:main {:entries [app.core]}}
+        :modules    {:main {:entries [app.core
+                                      app.react-router-app
+                                      app.react-query-app]}}
         ;; set up development related configuration
         :devtools
         ;; before live-reloading any code call this function

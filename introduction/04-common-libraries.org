@@ -1,0 +1,36 @@
+* Common Libraries and Advanced Interop
+
+Let's take a look how to use a couple of the common React
+libraries in CLJS and learn by example how the inter-op
+looks like and how to translate between JS and CLJS.
+
+** React Router
+
+#+attr_latex: :options linenos
+#+include: app/src/main/app/react_router_app.cljs src clojure
+
+** React Query
+
+Install the library
+
+#+begin_src bash
+❯ npm install react-query
+#+end_src
+
+https://shadow-cljs.github.io/docs/UsersGuide.html#_using_npm_packages
+
+Create new file =query.cljs= where we'll setup a lightweight wrapper for
+React Query so we do not need to worry about the interop at the view
+or component level.
+
+#+attr_latex: :options linenos
+#+include: app/src/main/app/query.cljs src clojure
+
+Now that we have our own interface for the library let's put it to use.
+
+#+attr_latex: :options linenos
+#+include: app/src/main/app/react_query_app.cljs src clojure
+
+TODO
+
+** React Intl
