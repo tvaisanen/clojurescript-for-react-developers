@@ -11,6 +11,21 @@
             [clojure.pprint :refer [pprint]]
             ["@tanstack/react-query" :as react-query]))
 
+(defn fetch-people
+  "
+  Just a wrapper for
+
+  fetch(URL)
+     .then((response) => response.json())
+     .then((data) => console.log(data))"
+  []
+  (-> (js/fetch "https://swapi.dev/api/people")
+      (.then (fn [response] (.json response)))
+      (.then (fn [data]
+               (js->clj data.results
+                        :keywordize-keys true)))))
+
+
 ;; TODO make this working
 
 (defnc PeopleWithReactQuery

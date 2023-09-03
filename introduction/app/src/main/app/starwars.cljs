@@ -76,7 +76,7 @@
 
 (defn use-query
   "create clojure wrapper for useQuery"
-  [query-key query-fn]
+  [{:keys [query-key query-fn]}]
   (let [result (react-query/useQuery
                 ;; useQuery is expecting a JS object
                 ;; instead of CLJS map

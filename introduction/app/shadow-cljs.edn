@@ -7,6 +7,7 @@
                 [cider/cider-nrepl "0.28.1"]
                 ;; React wrapper
                 [lilactown/helix "0.1.5"]
+                [cljs-bean "1.9.0"]
                 ;; Storybook like development
                 [devcards "0.2.5"]]
 
@@ -18,8 +19,9 @@
         :asset-path "/js/compiled"
         ;; modules created from Clojurescript sources
         :modules    {:main {:entries [app.core
-                                      app.react-router-app
-                                      app.react-query-app]}}
+                                      ;; app.react-router-app
+                                      ;; app.react-query-app
+                                      ]}}
         ;; set up development related configuration
         :devtools
         ;; before live-reloading any code call this function

@@ -1,26 +1,20 @@
-* Create a New Project
+* Project
 
-We'll be creating a simple project where we use the open Star Wars API
-to fetch characters from the movies and show these characters in the browser.
-We will also setup a development environment with =devcards= to have
-a dedicated space to work on the components without having to deal with
-the application as a whole.
+# We'll be creating a simple project where we use the open Star Wars API
+# to fetch characters from the movies and show these characters in the browser.
+# We will also setup a development environment with =devcards= to have
+# a dedicated space to work on the components without having to deal with
+# the application as a whole.
 
-On top of that we will setup unit testing with three types of test runners.
-One that we can see in the context of the component.
-Second where we have all the tests of the project in a browser view.
-Third node test runner for the that can be used withing the CI.
-And as a cherry on top we'll configure Github Actions to run tests
-and deploy the application on Github Pages on new commits.
+# On top of that we will setup unit testing with three types of test runners.
+# One that we can see in the context of the component.
+# Second where we have all the tests of the project in a browser view.
+# Third node test runner for the that can be used withing the CI.
+# And as a cherry on top we'll configure Github Actions to run tests
+# and deploy the application on Github Pages on new commits.
 
-Create a new project with =create-cljs-project= npm package.
-
-#+attr_latex: :frame lines
-#+begin_src bash
-$ npx create-cljs-project app
-#+end_src
-
-This sets up the basic project folder structure.
+We already created the project for the REPL exploration so let's just use that one to continue.
+The project structure should look something like this.
 
 #+comment: Fix tree branches not showing in expoert
 #+begin_src
@@ -32,7 +26,7 @@ app
 └── src
 #+end_src
 
-And adds =shadow-cljs= as a dev dependency as the Clojurescript tooling.
+And =package.json= should have =shadow-cljs= as a dev dependency.
 
 #+begin_src json
 {
@@ -46,7 +40,7 @@ And adds =shadow-cljs= as a dev dependency as the Clojurescript tooling.
 }
 #+end_src
 
-Clojure related dependecies and configuration is in =shadow-cljs.edn=
+Clojure dependecies and configuration is in =shadow-cljs.edn=
 
 #+begin_src clojure
 {:source-paths
@@ -61,18 +55,19 @@ Clojure related dependecies and configuration is in =shadow-cljs.edn=
  {}}
 #+end_src
 
-As the configuration shows, it there's no dependencies by default nor build configurations.
-To be able to compile our Clojurescript source code into Javascript, we need to setup a build
-target for that.
+As the configuration shows, there's no dependencies by default nor build configurations.
+To be able to compile our Clojurescript source code into Javascript, we need to configure
+a build target.
 
-But let's start by creating some source code to compile in the first place.
+But let's start by writing some source code to compile and creating an HTML file
+to load the soon compiled javascript bundle into the browser.
 
 #+begin_src bash
   ❯ mkdir src/main/app
   ❯ touch src/main/app/core.cljs
 #+end_src
 
-And write the following code into that file.
+And here's some Clojurescript code for the file.
 
 #+begin_src clojure
   (ns app.core)
@@ -95,13 +90,16 @@ And write the following code into that file.
     (js/console.log "Browser loaded the code"))
 #+end_src
 
-and after this lets configure the html file to load the code
+In the content you might have noticed the mystical =js/console.log= Just a moment...
+
+Create the public folder and index.html file.
 
 #+begin_src bash
 ❯ mkdir public
 ❯ touch public/index.html
 #+end_src
 
+The index file could look like this.
 
 #+begin_src html
 <!DOCTYPE html>
@@ -116,49 +114,51 @@ and after this lets configure the html file to load the code
 
 ** Set browser build target
 
-And finally lets configure the build to emit the =main.js= file from Clojure sources.
+And finally lets configure the build target in =shadow-cljs.edn= to emit the =main.js= file from Clojure sources.
+
 
 #+begin_src clojure
-     ;; shadow-cljs configuration
-    {:source-paths ["src/dev"
-                    "src/main"
-                    "src/test"]
+         ;; shadow-cljs configuration
+        {:source-paths ["src/dev"
+                        "src/main"
+                        "src/test"]
 
-     :dependencies [
-                    ;; Use Chrom(e/ium), do not work on Firefox
-                    [binaryage/devtools "0.9.7"]
+         :dependencies [;; Use Chrom(e/ium), do not work on Firefox
+                        ;; (unless you have the latest version of Firefox
+                        ;;  with custom formatters enabled)
+                        [binaryage/devtools "0.9.7"]
 
-                    ;; This is used for interacting with the application
-                    ;; from the browser. A bit more of that later.
-                    [cider/cider-nrepl "0.28.1"]]
+                        ;; This is used for interacting with the application
+                        ;; from the browser. A bit more of that later.
+                        [cider/cider-nrepl "0.28.1"]]
 
-     :builds
-     {:app {
-            ;; the javascript bundle is targeted to browser env
-            :target     :browser
+         :builds
+         {:app {
+                ;; the javascript bundle is targeted to browser env
+                :target     :browser
 
-            ;; the module `:main` is written here as `main.js`
-            :output-dir "public/js/compiled"
-            :asset-path "/js/compiled"
+                ;; the module `:main` is written here as `main.js`
+                :output-dir "public/js/compiled"
+                :asset-path "/js/compiled"
 
-            ;; modules created from Clojurescript sources
-            :modules {:main {:entries [core.app]}}
+                ;; modules created from Clojurescript sources
+                :modules {:main {:entries [app.core]}}
 
-            ;; set up development related configuration
-            :devtools
-            {
-             ;; before live-reloading any code call this function
-             :before-load core.app/stop
+                ;; set up development related configuration
+                :devtools
+                {
+                 ;; before live-reloading any code call this function
+                 :before-load app.core/stop
 
-             ;; after live-reloading finishes call this function
-             :after-load  core.app/start
+                 ;; after live-reloading finishes call this function
+                 :after-load  app.core/start
 
-             ;; serve the public directory over http at port 3000
-             :http-port   3000
-             :http-root   "public"
+                 ;; serve the public directory over http at port 3000
+                 :http-port   3000
+                 :http-root   "public"
 
-             ;; initialize devtools
-             :preloads    [devtools.preload]}}}}
+                 ;; initialize devtools
+                 :preloads    [devtools.preload]}}}}
 #+end_src
 
 Now we are ready to start the development server.
@@ -178,7 +178,8 @@ $ npx shadow-cljs watch app
 #+end_src
 
 Navigate to =localhost:3000= to load the =index.html= file to your browser
-via our development server.
+via our development server, and open up the devtools to see if everything
+up and running as expexted.
 
 ** Setup VSCode and Calva
 
@@ -198,7 +199,10 @@ via our development server.
      (+ 1 1)
    #+end_src
 
- Move your cursor over or inside the parenthesis and press =ALT+Enter=.
+ Move your cursor over or inside the parenthesis and press =ALT+Enter=
+ and if this doesn't work on your operating system try searching the right
+ command from VS code's command prompt with "Calva evaluate".
+
  If you see the number =2= floating around the cursor after this you've connected
  to the Clojure REPL successfully.
 
@@ -223,19 +227,19 @@ via our development server.
  ;; => #object[Location http://localhost:3000/]
  #+end_src
 
- Or simply using browsers JS console to log some values.
-
-
+ Or simply print values to browser console using JS =console.log= function from the REPL.
 
 #+begin_src clojure
 (js/console.log 123)
 #+end_src
 
-*** Interactin With the DOM
+*** Interacting With the DOM
 
  Let's create an input element dynamically from our editor
  and update the DOM on the fly in the running browser.
 
+ You can do this in the REPL or write the code in the =core.cljs=
+ file and evaluate the code with Calva.
 
    #+begin_src clojure
 
@@ -243,7 +247,7 @@ via our development server.
      (def el (js/document.createElement "input"))
      ;; => [#object[HTMLInputElement [object HTMLInputElement]]]
 
-     (set! (.-id el)) "input"
+     (set! (.-id el) "input")
      ;; => "input"
 
      (.appendChild (js/document.getElementById "app") el)

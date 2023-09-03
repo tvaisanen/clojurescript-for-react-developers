@@ -11,15 +11,13 @@
   [{:to "/movies"
     :label "movies"
     :element ($ movies/MovieList)}
-   {:to "/movies/:id"
-    :element ($ movies/MovieDetail)}
    {:to "/people"
     :label "people"
     :element (d/div "people")}])
 
 (defnc Layout []
   (d/div
-   ($ nav/Navbar {:navlinks (filter :label routes)})
+   ($ nav/Navbar {:navlinks routes})
    ($ router/RouteContent)))
 
 (defnc App []

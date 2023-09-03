@@ -1,50 +1,100 @@
-* What is Clojure(Script)
+# * Acknowledgment
+#   :PROPERTIES:
+#   :UNNUMBERED: notoc
+#   :END:
 
-Clojure is a general dynamic functional programming language that can
-be used to build fullstack web applications.
+# Thanks biby.
 
-#+begin_quote
-Clojure is a dynamic, general-purpose programming language, combining the approachability and interactive development of a scripting language with an efficient and robust infrastructure for multithreaded programming. Clojure is a compiled language, yet remains completely dynamic – every feature supported by Clojure is supported at runtime. Clojure provides easy access to the Java frameworks, with optional type hints and type inference, to ensure that calls to Java can avoid reflection. [fn:https://clojure.org]
-#+end_quote
+# * Preface
+#   :PROPERTIES:
+#   :UNNUMBERED: notoc
+#   :END:
 
-And Clojurescript is the version that compiles to JS.
+# Tell story about why the book and why is it I who writing it.
 
-#+begin_quote
-ClojureScript is a compiler for Clojure that targets JavaScript. It emits JavaScript code which is compatible with the advanced compilation mode of the Google Closure optimizing compiler. [fn:https://clojurescript.org]
-#+end_quote
+# I learned about functional programming because of React. It
+# introduced the concepts and showed me a path to a different way of
+# thinking that I had learnt from my studies in university.
+# After trying to apply this way of working to all aspects in
+# my professional life I felt that something was wrong.
 
-* Who is This Book For?
+# I had to "fight" for the functional way in projects where people
+# were coming from different backrounds and working on the same code
+# base.
 
-This book is meant for developers who have background in React web development
-and are interested in learning Clojure. React experience is not a must but
-the book doesn't go into details on how React works. Only how to use it
-with Clojure. Some of the concepts are explained with JS examples translated
-to Clojure and vice versa.
+# So I thought to myself that there must be a better way to do this.
+# Why working in a language that is designed to be a functiona language.
 
-After reading this book and you should be able to get started in
-Clojurescript web development using the common JS libraries.
-There's also a wealth of information and useful tools in the Clojure
-ecosystem that are not covered in this book and my hope is that
-getting started on the route with more traditional JS-like approach
-you get curious about all the other aspects as well.
+# That started my journey through to find my new programming language.
+
+# I dabbled in Erlang and Haskell but eventually realized that the
+# work opportunities for these language were not that abundant and also
+# I was into React and web development in general so these languages
+# would not provide the ecosystem.
+
+# Towards the end of 2019 I remembered that acquaintant had told me about
+# Clojure and I knew that there was a couple companies near by me who
+# were known to use it extensively and soon enough I was working professionally
+# in Clojure.
+
+# A while after I had jumped to the Clojure train I had a conversation with
+# an old colleaguea of mine and he was suruprised that I was actually
+# doing React development in Clojure. At that point it had already internalized
+# that of course you can do that, but as I learned it wasn't that obvious to
+# everybody.
+
+# This started me to think about how to communicate it better to non-Clojure
+# people and here we are. A book explaining just that.
 
 
-* Prerequisites
 
-  To be able to follow along you should have a working *node* installation configured on your machine
-  and an editor of your choice. A brief explanation is provided how to setup VSCode and Calva to
-  interact with the REPL.
 
-  So make sure that you have:
-  - Installed Node
-  - Installed VSCode
-  - Installed the VSCode Calva extension
+# * Who is This Book For
 
-  Of course you can use editor of your choice.
-  Intellij has Cursive a popular pluging for Clojure.
-  Emacs users use CIDER and for VIM there's fireplace.
-  Here we'll be setting up Calva because VSCode's popularity among React devs.
+# This book is meant for developers who have background in React web development
+# and are interested in learning Clojure. React experience is not a must but
+# the book doesn't go into details on how React works. Only how to use it
+# with Clojure. Some of the concepts are explained with JS examples translated
+# to Clojure and vice versa.
+
+# After reading this book and you should be able to get started in
+# Clojurescript web development using the common JS libraries.
+# There's also a wealth of information and useful tools in the Clojure
+# ecosystem that are not covered in this book and my hope is that
+# getting started on the route with more traditional JS-like approach
+# you get curious about all the other aspects as well.
+
+
+# * Prerequisites
+
+#   To be able to follow along you should have a working *node* installation configured on your machine
+#   and an editor of your choice. A brief explanation is provided how to setup VSCode and Calva to
+#   interact with the REPL.
+
+#   So make sure that you have:
+#   - Installed Node
+#   - Installed VSCode
+#   - Installed the VSCode Calva extension
+
+#   Of course you can use editor of your choice.
+#   Intellij has Cursive a popular pluging for Clojure.
+#   Emacs users use CIDER and for VIM there's fireplace.
+#   Here we'll be setting up Calva because VSCode's popularity among React devs.
+
 * Clojure: a Quick Tour
+
+# Clojure is a general dynamic functional programming language that can
+# be used to build fullstack web applications.
+
+# #+begin_quote
+# Clojure is a dynamic, general-purpose programming language, combining the approachability and interactive development of a scripting language with an efficient and robust infrastructure for multithreaded programming. Clojure is a compiled language, yet remains completely dynamic – every feature supported by Clojure is supported at runtime. Clojure provides easy access to the Java frameworks, with optional type hints and type inference, to ensure that calls to Java can avoid reflection. [fn:https://clojure.org]
+# #+end_quote
+
+# And Clojurescript is the version that compiles to JS.
+
+# #+begin_quote
+# ClojureScript is a compiler for Clojure that targets JavaScript. It emits JavaScript code which is compatible with the advanced compilation mode of the Google Closure optimizing compiler. [fn:https://clojurescript.org]
+# #+end_quote
 
 Let's fire up a REPL in the terminal so you can follow along with the examples.
 
@@ -61,7 +111,7 @@ can be thought of as modules in other languages.
 Namespace is declared with a =ns= macro.
 
 #+begin_src clojure
-(ns namespace-name)
+  (ns namespace-name)
 #+end_src
 
 If you are following along in the REPL you might have noticed
@@ -73,7 +123,8 @@ nil
 namespace-name=>
 #+end_src
 
-Namespace can have have a docstring as an optional second argument.
+Namespace can have have a docstring as an optional second argument
+to describe what is the namespace used for, similar to function docstrings.
 
 #+begin_src clojure :label namespace-01
   (ns namespace-name
@@ -81,6 +132,8 @@ Namespace can have have a docstring as an optional second argument.
 #+end_src
 
 As in Javascript and Typescript you can import code from other modules.
+Required namespace can be aliased with the =:as= keyword and then used with
+=alias/var-name= syntax.
 
 #+begin_src clojure
   (ns namespace-name
@@ -91,17 +144,15 @@ As in Javascript and Typescript you can import code from other modules.
   (other/function arg1)
 #+end_src
 
-You can use available JS modules by importing them as you would in JS
+Node modules can be imported imported and used as in JS
 by using the quoted library name when requiring the module.
 
 #+begin_src clojure
-  (ns namespace-name
-    "Docstring for the namespace"
-    :require [other-namespace :as other]
-             ["axios" :as axios])
-
-  ;; use JS modules similarly
-  (axios/get "url...")
+    cljs.user=> (require '["fs" :as fs])
+    cljs.user=> (fs/readdirSync ".")
+    [".calva" ".clj-kondo" ".gitignore" ".lsp" ".shadow-cljs"
+     "node_modules" "out" "package-lock.json" "package.json"
+     "shadow-cljs.edn" "src"]
 #+end_src
 
 Read more about namespaces from the official [[https://clojure.org/reference/namespaces][reference ]]and differences
@@ -124,9 +175,14 @@ After the variables are defined they can be used as expected.
 
 ** Data Types
 
-  A quick look at the basic data structures in Clojure.
-  This is in no means an exhaustive list of what's available.
-  Refer to the official documentation for complete picture.
+  # A quick look at the basic data structures in Clojure(Script).
+  # This is in no means an exhaustive list of what's available.
+  # Refer to the official documentation for the full picture.
+
+  I recommend using these as reference as we go further,
+  since this intro is just a quick overview to introduce basics:
+  - Clojurescript Cheatsheet: *https://cljs.info/cheatsheet/*
+  - Clojurescript API: http://cljs.github.io/api/
 
 *** Maps
 #+begin_src clojure
@@ -150,7 +206,13 @@ Maps are hash maps comparable to objects in JS.
 #+end_src
 
 To get values from a map you can use =get= with or without a default in the case that the value is not found.
-This is similar to pythons =object.get=
+This is useful in cases where in JS you'd reach out for the or operator.
+
+#+begin_src javascript
+  const var = obj.maybeKey || "default-value"
+#+end_src
+
+
 
 #+begin_src clojure
   (get map-variable :a)
@@ -160,7 +222,23 @@ This is similar to pythons =object.get=
   ;; => :not-found
 #+end_src
 
+In the case there's more than one possible =undefined= value in this chain.
+
+#+begin_src javascript
+  const var = obj.maybeKey || obj.secondMaybe || "default-value"
+#+end_src
+
+In Clojure just reach out to =or=.
+
+#+begin_src clojure
+  cljs.user=> (def obj {})
+  cljs.user=> (or (:maybe-key obj) (:second-maybe obj) "default-value")
+  "default-value"
+#+end_src
+
+
 The value can also be obtained with they keyword as a function or the map itself as a function applied with the keyword.
+
 #+begin_src clojure
 
   ;; use the key as a function to get the value
@@ -183,6 +261,31 @@ To remove value from a map use =dissoc= but remember that this do not alter the 
   Vectors in Clojure are like arrays in Javascript.
   Clojure also has lists but we'll concentrate just on the arrays
   in this context. Vectors are defined with brackets =[]= and lists with parenthesis ().
+
+#+begin_src clojure
+  cljs.user=> (type [])
+  cljs.core/PersistentVector
+
+  cljs.user=> (type ())
+  cljs.core/EmptyList
+
+  cljs.user=> (type (1 2))
+  [true ""]:repl/exception! ;; here we got an error!
+
+  cljs.user=> (type '(1 2))
+  cljs.core/List
+#+end_src
+
+Empty list can be initialized with just the parenthesis =()= but if there's
+any elements in the list a quote ='= or =quote= needs to be used.
+
+#+begin_src clojure
+cljs.user=> (quote (1 2 3))
+(1 2 3)
+cljs.user=> '(1 2 3)
+(1 2 3)
+#+end_src
+
 
 #+begin_src clojure
   (def vector-variable [1 2 3])
@@ -210,19 +313,21 @@ To remove value from a map use =dissoc= but remember that this do not alter the 
   ;; => (2 3 4)
 #+end_src
 
-  In Clojure we do not use the dot notation to access the prototype's methods,
-  but we use a dedicated function =map= and declare all the arguments.
+  In Clojure we are not using the prototype methods as in JS.
+  Instead we use a dedicated function =map= and declare all the arguments.
   Technically you could do this by using JS interop from Clojurescript, but
   in this case you would not be using the Clojure data structures.
 
-  I'll add an example here as a sneak peak and we'll talk more abou the
+  I'll add an example here as a sneak peak and we'll talk more about the
   JS interop a bit later.
-
 
   #+begin_src clojure
     ;; array creates a JS array in Clojurescript
     ;; and by using .map we are using the method of this array
+    (def data (array 1 2 3))
+
     (.map (array 1 2 3) (fn [value] (+ value 1)))
+    (data.map (fn [value] (+ value 1)))
     ;; => [2 3 4]
   #+end_src
   #+begin_src javascript
@@ -273,7 +378,44 @@ To remove value from a map use =dissoc= but remember that this do not alter the 
 
   Read more about threading macros in the [[https://clojure.org/guides/threading_macros][threading macro guide]].
 
+** Branching
 
+Here's a few of the branching options, look up the rest from the cheatsheet!
+
+#+begin_src clojure
+  cljs.user=> (if (true? true) "true" "false")
+  "true"
+
+  cljs.user=> (if-not (true? true) "true" "false")
+  "false"
+
+  cljs.user=> (when true "continue")
+  "continue"
+
+  cljs.user=> (when false "do nothing")
+  nil
+
+  cljs.user=> (when-not true "reverse 'when'")
+  nil
+
+  cljs.user=> (when-let [value 1] (inc value))
+  2
+
+  cljs.user=> (when-let [value nil] (inc value))
+  nil
+
+  cljs.user=> (when-first [value []] :found-value)
+  nil
+
+  cljs.user=> (when-first [value [:first :second]] value)
+  :first
+
+  cljs.user=> (if-let [value 2] (inc value) 0)
+  3
+
+  cljs.user=> (if-let [value nil] (inc value) 0)
+  0
+#+end_src
 ** Functions
 
 Functions are defined with $\mintinline{clojure}{defn}$ macro.

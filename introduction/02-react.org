@@ -36,7 +36,7 @@ restart our development server.
 
 ** Setup React Rendering
 
-Let's start by creating a new file for utility functions
+Let's start by creating a new file =src/main/app/utils.cljs= for utility functions
 where we define our render function we can use to mount
 our application into the DOM.
 
@@ -78,18 +78,8 @@ nil
 
 In practice we are creating a singleton "instance" for react-root
 that is accessed by calling the =react-root= function.
-=helix.core/$= is a macro that renders make a React element
-out of the given component but let's explore that in moment!
-
-#+begin_src clojure
-  (defn ^:dev/after-load init
-    "This function is used in the `index.html`
-    to load the application."
-    []
-    (.render (react-root)
-             ($ react/StrictMode ($ App))))
-#+end_src
-
+=helix.core/$= is a macro that creates React elements from valid types
+but let's explore that a bit more in moment!
 Now that we have the rendering covered we can create
 the first component, =App=.
 
@@ -98,16 +88,30 @@ the first component, =App=.
   (ns app.core
     (:require [helix.core :refer [defnc $]]
               [helix.dom :as d]
-              ;; import the namespace (module)
-              ;; with the render function
               [app.utils :as utils]))
 
   (defnc App []
     (d/div "This is a React component."))
 
   (defn ^:dev/after-load init []
-    ;;
-    (utils/render ($ App)))
+    (utils/render App))
+#+end_src
+
+If VSCode is warning on the App we need to import Helix's =clj-kondo= configurations.
+
+For this we need to create new file called =deps.edn= in the project root directory.
+
+
+
+#+begin_src clojure
+  {:deps {lilactown/helix {:mvn/version "0.1.10"}}}
+#+end_src
+
+And next we run =clj-kondo= as instructed by the documentation. https://cljdoc.org/d/clj-kondo/clj-kondo/2023.03.17/doc/configuration#importing
+
+#+begin_src bash
+  $ clj-kondo --lint "$(clojure -Spath)" --copy-configs --skip-lint
+  $ clj-kondo --lint $(clojure -Spath) --dependencies --parallel
 #+end_src
 
 Here the =defnc= macro on the creates a =React.FunctionalComponent=
@@ -189,129 +193,87 @@ And if we compare this to the JS
 
  We can see how these relate.
 
-** Simple List App
+** Build an App
 
 #+COMMENT: make this as a simple list app
 
-First create a new file for these `app/starwars.cljs` and import required libraries.
+TODO: layout of the app
+
+#+begin_src markdown
+  |  nav | nav    |
+  | list | detail |
+#+end_src
+
+We need a navbar, listview and a detail view.
+
+Let's start by creating the template with navigation and the content container.
+
+TODO: Should I setup the routing from the get go. Probably!
+
+Let's start on the navigation part.
+First let's see how we can use =react-router= to define the frontend routes.
+
+Here we'll be doing some JS/CLJS interop.
+
+But first things first, install =react-router=
+
+#+begin_src bash
+ npm install react-routerv6
+#+end_src
+
+# #+caption: utils.cljs
+#+attr_latex: :options linenos
+#+name: utils-cljs
+#+include: app/src/main/app/router.cljs src clojure
+
+Now that we have dealt with the interop, we are ready to
+define the routes and start the work on our first component, the Navbar.
+
+# #+caption: utils.cljs
+#+attr_latex: :options linenos
+#+name: utils-cljs
+#+include: app/src/main/app/nav.cljs src clojure
+
+Here we have a simple renderer for Navlinks.
+Next, Put this into play and define the routes in the =core.cljs= file.
 
 #+attr_latex: :options linenos
-#+begin_src clojure
-  (ns app.starwars
-    (:require [helix.core :refer [defnc $]]
-              [helix.dom :as d]))
+#+name: utils-cljs
+#+include: app/src/main/app/core_02.cljs src clojure
 
-    ;; Let's start with listing the characters in a variable and
-    (def people [{:name "Luke" :details "Luke's story"}
-                 {:name "Chewbacca" :details "Chwebacca's story"}
-                 {:name "C-3PO" :details "C-3PO's story"}])
+Now you should be able to have a working frontend navigation
+in your application between the movies and people pages.
 
-
-    ;; Create React.FunctionalComponent
-    (defnc People
-      []
-      ;; define state for selecting the detail
-      ;; hooks/use-state is a wrapper for React.useState
-      ;; we could also use React.useState here and it would work
-      (let [[selected set-selected] (hooks/use-state nil)]
-        (d/div
-         (d/h1 "Starwars People")
-         (d/ul
-          ;; iterate over people and create <li>{name}</li> for each
-          (for [{:keys [name] :as person} people]
-            (d/li {:key name
-                   ;; on click detail, set the clicked person as selected
-                   :on-click #(set-selected person)} name)))
-         ;; if person selected show the details
-         (when selected
-           (d/div
-            (:details selected))))))
-#+end_src
-
-Import the starwars namespace into the core
-
-#+begin_src clojure
-  (ns app.core
-    (:require [helix.core :refer [defnc $]]
-              [helix.dom :as d]
-              ;; import the starwars
-              [app.starwars :as sw]
-              ["react" :as react]
-              ["react-dom/client" :as rdom]))
-#+end_src
-
-Replace the =App= with =sw/People=.
-
-#+begin_src clojure
-(defn ^:dev/after-load init
-  "This function is used in the `index.html`
-  to load the application."
-  []
-  (.render (react-root)
-           ;; `$` is a macro to make a React
-           ;; element out of the given component
-           ($ react/StrictMode ($ sw/People))))
-#+end_src
-
-*** Fetch people from SWAPI
+Let's get some data for rendering the page content.
+For that we need a function to make http requests.
+We'll be using the browser =fetch= for this.
 
 #+attr_latex: :options linenos
-#+begin_src clojure
-  (ns app.starwars
-    (:require [helix.core :refer [defnc $]]
-              [helix.dom :as d]
-              ;; add hooks and pprint
-              [helix.hooks :as hooks]
-              [clojure.pprint :refer [pprint]]))
+#+name: utils-cljs
+#+include: app/src/main/app/http.cljs src clojure
 
-    (defn fetch-people
-      "
-      Just a wrapper for
+Now we are ready to make our first HTTP query!
 
-      fetch(URL)
-         .then((response) => response.json())
-         .then((data) => console.log(data))"
-      []
-      (-> (js/fetch "https://swapi.dev/api/people")
-          (.then (fn [response] (.json response)))
-          (.then (fn [data]
-                   (js->clj data.results
-                            :keywordize-keys true)))))
+#+attr_latex: :options linenos
+#+name: utils-cljs
+#+include: app/src/main/app/movies_01.cljs src clojure
 
-    (defnc PeopleFromAPI
-      []
-      (let [[people set-people] (hooks/use-state [])
-            [selected set-selected] (hooks/use-state nil)]
+Nobody wants to deal with managing the queries themselves
+so let's just create a wrapper for the =react-query= library
+to make our lives a lot easier in the long term.
 
-        ;; React.useEffect
-        (hooks/use-effect
-         ;; run this hook only once
-         :once
-         (fn [] ;; fetch the people
-           (-> (fetch-people)
-               ;; and set-people with the result data
-               (.then set-people))))
-        (d/div
-         (d/h1 "Starwars People")
-         (d/ul
-          (for [{:keys [name] :as person} people]
-            (d/li {:key      name
-                   :on-click #(set-selected person)} name)))
-         (when selected
-           (d/pre
-            ;; think this as JSON.stringify(selected)
-            (with-out-str (pprint selected)))))))
-#+end_src
+#+attr_latex: :options linenos
+#+name: utils-cljs
+#+include: app/src/main/app/query.cljs src clojure
 
-Replace the =sw/People= with =sw/PeopleFromAPI=.
+And now lets update the movielist component to use the new query wrapper
 
-#+begin_src clojure
-(defn ^:dev/after-load init
-  "This function is used in the `index.html`
-  to load the application."
-  []
-  (.render (react-root)
-           ;; `$` is a macro to make a React
-           ;; element out of the given component
-           ($ react/StrictMode ($ sw/PeopleFromAPI))))
-#+end_src
+#+attr_latex: :options linenos
+#+name: utils-cljs
+#+include: app/src/main/app/movies_02.cljs src clojure
+
+Let's add a detail view to make a dynamic view.
+
+#+attr_latex: :options linenos
+#+name: utils-cljs
+#+include: app/src/main/app/movies.cljs src clojure

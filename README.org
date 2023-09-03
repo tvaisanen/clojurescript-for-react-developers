@@ -13,8 +13,7 @@
 #+include: introduction/00-intro.org
 #+include: introduction/01-setup.org
 #+include: introduction/02-react.org
-#+include: introduction/04-common-libraries.org
-#+include: introduction/05-handling-state.org
-#+include: introduction/03-tests-and-devcards.org
-#+include: introduction/06-building.org
-#+include: introduction/07-next-steps.org
+# #+include: introduction/05-handling-state.org
+# #+include: introduction/03-tests-and-devcards.org
+# #+include: introduction/06-building.org
+# #+include: introduction/07-next-steps.org
