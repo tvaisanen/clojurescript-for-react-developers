@@ -37,8 +37,7 @@ restart our development server.
 ** Setup React Rendering
 
 Let's start by creating a new file =src/main/app/utils.cljs= for utility functions
-where we define our render function we can use to mount
-our application into the DOM.
+where we define our render function to mount the app into the DOM.
 
 # #+caption: utils.cljs
 #+attr_latex: :options linenos
@@ -108,6 +107,13 @@ For this we need to create new file called =deps.edn= in the project root direct
 #+end_src
 
 And next we run =clj-kondo= as instructed by the documentation. https://cljdoc.org/d/clj-kondo/clj-kondo/2023.03.17/doc/configuration#importing
+
+#+begin_quote
+ clj-kondo is a static analyzer and linter for Clojure code that sparks joy.
+ https://github.com/clj-kondo/clj-kondo
+#+end_quote
+
+Calva uses clj-kondo for linting.
 
 #+begin_src bash
   $ clj-kondo --lint "$(clojure -Spath)" --copy-configs --skip-lint
@@ -197,23 +203,8 @@ And if we compare this to the JS
 
 #+COMMENT: make this as a simple list app
 
-TODO: layout of the app
-
-#+begin_src markdown
-  |  nav | nav    |
-  | list | detail |
-#+end_src
-
-We need a navbar, listview and a detail view.
-
-Let's start by creating the template with navigation and the content container.
-
-TODO: Should I setup the routing from the get go. Probably!
-
-Let's start on the navigation part.
-First let's see how we can use =react-router= to define the frontend routes.
-
-Here we'll be doing some JS/CLJS interop.
+Let's start by creating the template with navigation and the content container,
+and setup js/cljs interop with the =react-router=
 
 But first things first, install =react-router=
 
@@ -261,6 +252,10 @@ Now we are ready to make our first HTTP query!
 Nobody wants to deal with managing the queries themselves
 so let's just create a wrapper for the =react-query= library
 to make our lives a lot easier in the long term.
+
+#+begin_src bash
+ npm install @tanstack/react-query
+#+end_src
 
 #+attr_latex: :options linenos
 #+name: utils-cljs

@@ -13,8 +13,8 @@
 # And as a cherry on top we'll configure Github Actions to run tests
 # and deploy the application on Github Pages on new commits.
 
-We already created the project for the REPL exploration so let's just use that one to continue.
-The project structure should look something like this.
+We already created the project for the REPL exploration so let's continue with it.
+The file structure should look something like this.
 
 #+comment: Fix tree branches not showing in expoert
 #+begin_src
@@ -40,7 +40,7 @@ And =package.json= should have =shadow-cljs= as a dev dependency.
 }
 #+end_src
 
-Clojure dependecies and configuration is in =shadow-cljs.edn=
+Clojure dependencies and configuration is in =shadow-cljs.edn=
 
 #+begin_src clojure
 {:source-paths
@@ -56,8 +56,7 @@ Clojure dependecies and configuration is in =shadow-cljs.edn=
 #+end_src
 
 As the configuration shows, there's no dependencies by default nor build configurations.
-To be able to compile our Clojurescript source code into Javascript, we need to configure
-a build target.
+To compile our the sources into Javascript, we need to configure a build target.
 
 But let's start by writing some source code to compile and creating an HTML file
 to load the soon compiled javascript bundle into the browser.
@@ -92,7 +91,7 @@ And here's some Clojurescript code for the file.
 
 In the content you might have noticed the mystical =js/console.log= Just a moment...
 
-Create the public folder and index.html file.
+Create the public folder to the project root and add =index.html= file into it.
 
 #+begin_src bash
 ❯ mkdir public
@@ -118,47 +117,48 @@ And finally lets configure the build target in =shadow-cljs.edn= to emit the =ma
 
 
 #+begin_src clojure
-         ;; shadow-cljs configuration
-        {:source-paths ["src/dev"
-                        "src/main"
-                        "src/test"]
+   ;; shadow-cljs configuration
+  {:source-paths ["src/dev"
+                  "src/main"
+                  "src/test"]
 
-         :dependencies [;; Use Chrom(e/ium), do not work on Firefox
-                        ;; (unless you have the latest version of Firefox
-                        ;;  with custom formatters enabled)
-                        [binaryage/devtools "0.9.7"]
+   :dependencies [;; Use Chrom(e/ium), do not work on Firefox
+                  ;; (unless you have the latest version of Firefox
+                  ;;  with custom formatters enabled
+                  ;;  https://www.clojuriststogether.org/news/firefox-116.0-release/)
+                  [binaryage/devtools "0.9.7"]
 
-                        ;; This is used for interacting with the application
-                        ;; from the browser. A bit more of that later.
-                        [cider/cider-nrepl "0.28.1"]]
+                  ;; This is used for interacting with the application
+                  ;; from the browser. A bit more of that later.
+                  [cider/cider-nrepl "0.28.1"]]
 
-         :builds
-         {:app {
-                ;; the javascript bundle is targeted to browser env
-                :target     :browser
+   :builds ;; https://shadow-cljs.github.io/docs/UsersGuide.html#_build_configuration
+   {:app {
+          ;; the javascript bundle is targeted to browser env
+          :target     :browser
 
-                ;; the module `:main` is written here as `main.js`
-                :output-dir "public/js/compiled"
-                :asset-path "/js/compiled"
+          ;; the module `:main` is written here as `main.js`
+          :output-dir "public/js/compiled"
+          :asset-path "/js/compiled"
 
-                ;; modules created from Clojurescript sources
-                :modules {:main {:entries [app.core]}}
+          ;; modules created from Clojurescript sources
+          :modules {:main {:entries [app.core]}}
 
-                ;; set up development related configuration
-                :devtools
-                {
-                 ;; before live-reloading any code call this function
-                 :before-load app.core/stop
+          ;; set up development related configuration
+          :devtools
+          {
+           ;; before live-reloading any code call this function
+           :before-load app.core/stop
 
-                 ;; after live-reloading finishes call this function
-                 :after-load  app.core/start
+           ;; after live-reloading finishes call this function
+           :after-load  app.core/start
 
-                 ;; serve the public directory over http at port 3000
-                 :http-port   3000
-                 :http-root   "public"
+           ;; serve the public directory over http at port 3000
+           :http-port   3000
+           :http-root   "public"
 
-                 ;; initialize devtools
-                 :preloads    [devtools.preload]}}}}
+           ;; initialize devtools
+           :preloads    [devtools.preload]}}}}
 #+end_src
 
 Now we are ready to start the development server.
@@ -217,20 +217,20 @@ up and running as expexted.
  should prompt the alert window in the browser.
 
  #+begin_src clojure
-   (js/alert 1)
+   cljs.user=> (js/alert 1)
  #+end_src
 
  To access values like the =document.location=
 
  #+begin_src clojure
- js/document.location
+ cljs.user=> js/document.location
  ;; => #object[Location http://localhost:3000/]
  #+end_src
 
  Or simply print values to browser console using JS =console.log= function from the REPL.
 
 #+begin_src clojure
-(js/console.log 123)
+ cljs.user=> (js/console.log 123)
 #+end_src
 
 *** Interacting With the DOM

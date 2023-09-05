@@ -250,10 +250,14 @@ The value can also be obtained with they keyword as a function or the map itself
 #+end_src
 
 To remove value from a map use =dissoc= but remember that this do not alter the original map, it returns a new value of existing parameters minus the removed parameter.
+It also can take multiple args.
 
 #+begin_src clojure
   (dissoc map-variable :b)
   ;; => {:a 1}
+
+  (dissoc map-variable :a :b)
+  ;; => ={}
 #+end_src
 
 *** Vectors
@@ -277,7 +281,7 @@ To remove value from a map use =dissoc= but remember that this do not alter the 
 #+end_src
 
 Empty list can be initialized with just the parenthesis =()= but if there's
-any elements in the list a quote ='= or =quote= needs to be used.
+any elements in the list a [[https://clojure.org/reference/special_forms#quote][quote]] ='= or =quote= needs to be used.
 
 #+begin_src clojure
 cljs.user=> (quote (1 2 3))
@@ -286,6 +290,8 @@ cljs.user=> '(1 2 3)
 (1 2 3)
 #+end_src
 
+This is because clojure evaluates the first element as function. Using quote
+returns the unevaluated form. I.e. just the data without evaluation.
 
 #+begin_src clojure
   (def vector-variable [1 2 3])
@@ -327,12 +333,20 @@ cljs.user=> '(1 2 3)
     (def data (array 1 2 3))
 
     (.map (array 1 2 3) (fn [value] (+ value 1)))
-    (data.map (fn [value] (+ value 1)))
     ;; => [2 3 4]
+
+     (defn f []
+       (.map (array 1 2 3)
+             (fn [value]
+               (+ value 1))))
   #+end_src
   #+begin_src javascript
-  // Compiled JS
-  [(1),(2),(3)].map((function (value){return (value + (1));}));
+    // Compiled JS
+    function cljs$user$f(){
+        return [(1),(2),(3)].map((function (value){
+            return (value + (1));
+        }));
+    }
   #+end_src
 
   But let's get back on the topic. Similarly as with =map=
@@ -366,7 +380,7 @@ cljs.user=> '(1 2 3)
 #+end_src
 
   We can evaluate the above expression with =macroexpand= function
-  To confirm that it is equivalent.
+  to see past the syntactic sugar =->>= provides.
 
   #+begin_src clojure
   (macroexpand
