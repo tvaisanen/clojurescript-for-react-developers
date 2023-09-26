@@ -246,8 +246,15 @@ We'll be using the browser =fetch= for this.
 Now we are ready to make our first HTTP query!
 
 #+attr_latex: :options linenos
-#+name: utils-cljs
 #+include: app/src/main/app/movies_01.cljs src clojure
+
+#+attr_latex: :options linenos
+#+include: app/src/main/app/movies_01.cljs src clojure
+
+And add the =MovieList= to the =app.core/routes=.
+
+#+attr_latex: :options linenos
+#+include: app/src/main/app/core_03.cljs :lines "-17" src clojure
 
 Nobody wants to deal with managing the queries themselves
 so let's just create a wrapper for the =react-query= library
