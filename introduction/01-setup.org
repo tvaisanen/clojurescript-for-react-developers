@@ -56,7 +56,7 @@ Clojure dependencies and configuration is in =shadow-cljs.edn=
 #+end_src
 
 As the configuration shows, there's no dependencies by default nor build configurations.
-To compile our the sources into Javascript, we need to configure a build target.
+To compile our source code to Javascript, we need to configure a build target.
 
 But let's start by writing some source code to compile and creating an HTML file
 to load the soon compiled javascript bundle into the browser.
